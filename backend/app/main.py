@@ -11,6 +11,7 @@ app = FastAPI(title='Knowledge Base Chatbot API', version='1.0.0')
 origins = [
     'http://localhost:5173',
     'http://localhost:3000',
+    'https://kb-chatbot-oa0vknqlv-sai-pendyalas-projects.vercel.app',
     os.getenv('FRONTEND_URL', ''),
 ]
 
@@ -25,7 +26,6 @@ app.add_middleware(
 app.include_router(ingest.router, prefix='/api/v1')
 app.include_router(chat.router, prefix='/api/v1')
 app.include_router(documents.router, prefix='/api/v1')
-
 
 @app.get('/health')
 def health():
