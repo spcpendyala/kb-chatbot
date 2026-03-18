@@ -8,17 +8,10 @@ load_dotenv()
 
 app = FastAPI(title='Knowledge Base Chatbot API', version='1.0.0')
 
-origins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://kb-chatbot-oa0vknqlv-sai-pendyalas-projects.vercel.app',
-    os.getenv('FRONTEND_URL', ''),
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=['*'],
     allow_headers=['*'],
 )
