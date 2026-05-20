@@ -38,7 +38,7 @@ async def generate_answer(question: str, sources: list[Source], history: list) -
     messages.append({'role': 'user', 'content': question})
 
     response = client.chat.completions.create(
-        model='qwen/qwen3-coder:free',
+        model='mistralai/mistral-7b-instruct:free',
         messages=messages,
     )
 
