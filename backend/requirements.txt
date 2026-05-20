@@ -7,3 +7,4 @@ pypdf>=4.0.0
 tiktoken>=0.8.0
 pydantic>=2.7.0
 openai>=1.0.0
+qdrant-client
