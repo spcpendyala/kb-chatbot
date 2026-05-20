@@ -1,28 +1,31 @@
 import os
 from dotenv import load_dotenv
-from google import genai
+from openai import OpenAI
 from app.database.chroma_client import get_collection
 from app.models.schemas import Source
 
 load_dotenv()
 
 
-def get_client():
-    return genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+def get_embedding_client():
+    return OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+    )
 
 
 def retrieve(query: str, n_results=5) -> list[Source]:
-    client = get_client()
+    client = get_embedding_client()
     collection = get_collection()
 
     if collection.count() == 0:
         return []
 
-    result = client.models.embed_content(
-        model='models/gemini-embedding-001',
-        contents=[query],
+    response = client.embeddings.create(
+        model="openai/text-embedding-3-small",
+        input=[query],
     )
-    query_embedding = result.embeddings[0].values
+    query_embedding = response.data[0].embedding
 
     results = collection.query(
         query_embeddings=[query_embedding],

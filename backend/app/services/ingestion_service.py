@@ -3,14 +3,17 @@ import uuid
 import tiktoken
 from datetime import datetime
 from dotenv import load_dotenv
-from google import genai
+from openai import OpenAI
 from app.database.chroma_client import get_collection
 
 load_dotenv()
 
 
-def get_client():
-    return genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
+def get_embedding_client():
+    return OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY"),
+    )
 
 
 def chunk_text(text: str, chunk_size=500, overlap=50) -> list[str]:
@@ -27,12 +30,12 @@ def chunk_text(text: str, chunk_size=500, overlap=50) -> list[str]:
 
 
 def embed_texts(texts: list[str]) -> list[list[float]]:
-    client = get_client()
-    result = client.models.embed_content(
-        model='models/gemini-embedding-001',
-        contents=texts,
+    client = get_embedding_client()
+    response = client.embeddings.create(
+        model="openai/text-embedding-3-small",
+        input=texts,
     )
-    return [e.values for e in result.embeddings]
+    return [item.embedding for item in response.data]
 
 
 async def ingest_document(text: str, filename: str) -> dict:

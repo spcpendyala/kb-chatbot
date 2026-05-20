@@ -1,4 +1,4 @@
-import PyPDF2
+from pypdf import PdfReader
 import io
 from fastapi import UploadFile, HTTPException
 
@@ -7,7 +7,7 @@ async def extract_text(file: UploadFile) -> str:
     content = await file.read()
 
     if file.filename.endswith('.pdf'):
-        reader = PyPDF2.PdfReader(io.BytesIO(content))
+        reader = PdfReader(io.BytesIO(content))
         text = ' '.join(page.extract_text() or '' for page in reader.pages)
     elif file.filename.endswith('.txt'):
         text = content.decode('utf-8', errors='ignore')
