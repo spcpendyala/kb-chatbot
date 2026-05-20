@@ -89,6 +89,7 @@ export default function ChatInterface() {
             rows={1}
             style={{ resize: 'none', maxHeight: '120px' }}
             className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 focus:outline-none leading-relaxed"
+style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
           />
           <button
