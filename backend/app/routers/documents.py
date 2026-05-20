@@ -1,35 +1,45 @@
 from fastapi import APIRouter
-from app.database.chroma_client import get_collection
+from app.database.qdrant_client import get_collection, COLLECTION_NAME
 
 router = APIRouter()
 
-
 @router.get('/documents')
 def list_documents():
-    col = get_collection()
-    if col.count() == 0:
-        return {'documents': []}
-
-    result = col.get(include=['metadatas'])
+    qdrant = get_collection()
     seen = {}
-    for meta in result['metadatas']:
-        did = meta['document_id']
-        if did not in seen:
-            seen[did] = {
-                'document_id': did,
-                'filename': meta['filename'],
-                'chunk_count': 0,
-                'created_at': meta.get('created_at', '')
-            }
-        seen[did]['chunk_count'] += 1
-
+    offset = None
+    while True:
+        results, offset = qdrant.scroll(
+            collection_name=COLLECTION_NAME,
+            with_payload=True,
+            limit=100,
+            offset=offset,
+        )
+        for point in results:
+            did = point.payload['document_id']
+            if did not in seen:
+                seen[did] = {
+                    'document_id': did,
+                    'filename': point.payload['filename'],
+                    'chunk_count': 0,
+                    'created_at': point.payload.get('created_at', ''),
+                }
+            seen[did]['chunk_count'] += 1
+        if offset is None:
+            break
     return {'documents': list(seen.values())}
-
 
 @router.delete('/documents/{document_id}')
 def delete_document(document_id: str):
-    col = get_collection()
-    result = col.get(where={'document_id': document_id})
-    if result['ids']:
-        col.delete(ids=result['ids'])
-    return {'deleted': document_id, 'chunks_removed': len(result['ids'])}
+    qdrant = get_collection()
+    from qdrant_client.models import Filter, FieldCondition, MatchValue
+    qdrant.delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=Filter(
+            must=[FieldCondition(
+                key="document_id",
+                match=MatchValue(value=document_id)
+            )]
+        )
+    )
+    return {'deleted': document_id}
