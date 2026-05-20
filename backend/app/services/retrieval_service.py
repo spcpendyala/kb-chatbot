@@ -22,12 +22,12 @@ def retrieve(query: str, n_results=5) -> list[Source]:
     )
     query_embedding = response.data[0].embedding
 
-    results = qdrant.search(
-        collection_name=COLLECTION_NAME,
-        query_vector=query_embedding,
-        limit=n_results,
-        with_payload=True,
-    )
+    results = qdrant.query_points(
+    collection_name=COLLECTION_NAME,
+    query=query_embedding,
+    limit=n_results,
+    with_payload=True,
+    ).points
 
     sources = []
     for hit in results:
