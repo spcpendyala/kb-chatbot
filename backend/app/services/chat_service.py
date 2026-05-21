@@ -33,7 +33,7 @@ async def generate_answer(question: str, sources: list[Source], history: list) -
     messages.append({'role': 'user', 'content': question})
     try:
         response = client.chat.completions.create(
-            model='meta-llama/llama-3.1-8b-instruct:free',
+            model='openrouter/free',
             messages=messages,
         )
         return response.choices[0].message.content
