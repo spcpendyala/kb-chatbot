@@ -1,9 +1,9 @@
 import os
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, VectorParams, PayloadSchemaType
 
 COLLECTION_NAME = "documents"
-VECTOR_SIZE = 1536  # text-embedding-3-small
+VECTOR_SIZE = 1536
 
 _client = None
 
@@ -24,4 +24,10 @@ def get_collection():
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE),
         )
+    # Create payload index for document_id so filtering/deletion works
+    client.create_payload_index(
+        collection_name=COLLECTION_NAME,
+        field_name="document_id",
+        field_schema=PayloadSchemaType.KEYWORD,
+    )
     return client
