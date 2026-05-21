@@ -49,7 +49,7 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-center fade-up">
             <div className="w-12 h-12 rounded-2xl bg-violet-600/20 border border-violet-500/20 flex items-center justify-center mb-4">
@@ -87,7 +87,7 @@ export default function ChatInterface() {
             onKeyDown={onKeyDown}
             placeholder="Ask a question about your documents…"
             rows={1}
-            style={{ resize: 'none', maxHeight: '120px' }}
+            style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
             className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 focus:outline-none leading-relaxed"
 style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
