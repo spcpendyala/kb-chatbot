@@ -81,17 +81,16 @@ export default function ChatInterface() {
       <div className="p-4 border-t border-white/5">
         <div className="flex gap-3 items-end bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-violet-500/40 transition-colors">
           <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Ask a question about your documents…"
-            rows={1}
-            style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
-            className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 focus:outline-none leading-relaxed"
-style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
-            onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
-          />
+  ref={textareaRef}
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={onKeyDown}
+  placeholder="Ask a question about your documents…"
+  rows={1}
+  style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
+  className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 focus:outline-none leading-relaxed"
+  onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
+/>
           <button
             onClick={send}
             disabled={!input.trim() || loading}
