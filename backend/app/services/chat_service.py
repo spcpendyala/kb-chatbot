@@ -38,7 +38,7 @@ async def generate_answer(question: str, sources: list[Source], history: list) -
     messages.append({'role': 'user', 'content': question})
 
     response = client.chat.completions.create(
-        model='mistralai/mistral-7b-instruct:free',
+        model='google/gemma-3-12b-it:free',
         messages=messages,
     )
 
