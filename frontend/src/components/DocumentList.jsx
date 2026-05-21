@@ -35,36 +35,91 @@ export default function DocumentList({ refreshTrigger }) {
     catch { return '' }
   }
 
-  if (loading) return <div className="flex-1 flex items-center justify-center"><Loader2 size={16} className="text-gray-600 animate-spin" /></div>
-
   return (
-    <div className="flex-1 overflow-y-auto p-4">
-      <p className="text-xs font-semibold tracking-widest text-violet-400 uppercase mb-3">
-        Documents <span className="text-gray-600 font-normal normal-case tracking-normal ml-1">({docs.length})</span>
-      </p>
-      {docs.length === 0 ? (
-        <div className="text-center py-8">
-          <Layers size={24} className="mx-auto mb-2 text-gray-700" />
-          <p className="text-xs text-gray-600">No documents yet.</p>
-          <p className="text-xs text-gray-700 mt-1">Upload above to get started.</p>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Header — fixed */}
+      <div style={{ padding: '16px 20px 8px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.1em', color: '#7c3aed', textTransform: 'uppercase' }}>
+            Documents
+          </span>
+          <span style={{
+            fontSize: 10, color: '#4b5563',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 20, padding: '1px 8px',
+          }}>{docs.length}</span>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {docs.map(doc => (
-            <div key={doc.document_id} className="group flex items-start gap-2.5 p-2.5 rounded-lg bg-white/3 hover:bg-white/6 border border-white/5 hover:border-white/10 transition-all">
-              <FileText size={14} className="text-violet-400 shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-300 truncate">{doc.filename}</p>
-                <p className="text-xs text-gray-600 mt-0.5">{doc.chunk_count} chunks · {formatDate(doc.created_at)}</p>
+      </div>
+
+      {/* List — scrollable */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px 12px' }}>
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 32 }}>
+            <Loader2 size={16} color="#555" style={{ animation: 'spin 1s linear infinite' }} />
+          </div>
+        ) : docs.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+            <Layers size={22} color="#2d2d3d" style={{ margin: '0 auto 8px' }} />
+            <p style={{ fontSize: 12, color: '#4b5563', margin: 0 }}>No documents yet.</p>
+            <p style={{ fontSize: 11, color: '#374151', marginTop: 4 }}>Upload above to get started.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {docs.map(doc => (
+              <div
+                key={doc.document_id}
+                style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 10,
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  position: 'relative',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+                className="doc-item"
+              >
+                <FileText size={13} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    fontSize: 12, fontWeight: 500, color: '#d1d5db',
+                    margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>{doc.filename}</p>
+                  <p style={{ fontSize: 11, color: '#4b5563', margin: '2px 0 0' }}>
+                    {doc.chunk_count} chunks · {formatDate(doc.created_at)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDelete(doc.document_id, doc.filename)}
+                  disabled={deleting === doc.document_id}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#4b5563', padding: 2, display: 'flex',
+                    alignItems: 'center', flexShrink: 0,
+                    opacity: deleting === doc.document_id ? 0.5 : 1,
+                    transition: 'color 0.15s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
+                  onMouseLeave={e => e.currentTarget.style.color = '#4b5563'}
+                >
+                  {deleting === doc.document_id
+                    ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} />
+                    : <Trash2 size={12} />
+                  }
+                </button>
               </div>
-              <button onClick={() => handleDelete(doc.document_id, doc.filename)} disabled={deleting === doc.document_id}
-                className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all disabled:opacity-50">
-                {deleting === doc.document_id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        div[style*="overflowY"]::-webkit-scrollbar { width: 3px; }
+        div[style*="overflowY"]::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+      `}</style>
     </div>
   )
 }
