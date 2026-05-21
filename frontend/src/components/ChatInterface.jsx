@@ -11,9 +11,12 @@ export default function ChatInterface() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef()
   const textareaRef = useRef()
+  const scrollRef = useRef()
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
   }, [messages, loading])
 
   const send = async () => {
@@ -23,6 +26,9 @@ export default function ChatInterface() {
     const userMsg = { role: 'user', content: text }
     setMessages(prev => [...prev, userMsg])
     setInput('')
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
     setLoading(true)
 
     const history = messages.slice(-6).map(m => ({ role: m.role, content: m.content }))
@@ -48,59 +54,146 @@ export default function ChatInterface() {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      {/* Messages — this is the only scrollable area */}
+      <div
+        ref={scrollRef}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 16,
+        }}
+      >
         {messages.length === 0 && (
-          <div className="h-full flex flex-col items-center justify-center text-center fade-up">
-            <div className="w-12 h-12 rounded-2xl bg-violet-600/20 border border-violet-500/20 flex items-center justify-center mb-4">
-              <MessageSquare size={22} className="text-violet-400" />
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            padding: '60px 20px',
+          }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 16,
+              background: 'rgba(124,58,237,0.15)',
+              border: '1px solid rgba(124,58,237,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: 16,
+            }}>
+              <MessageSquare size={22} color="#a78bfa" />
             </div>
-            <p className="text-gray-400 font-medium">Ask anything about your documents</p>
-            <p className="text-sm text-gray-600 mt-1 max-w-xs">
-              Upload documents on the left, then ask questions here. Answers are grounded in your documents with citations.
+            <p style={{ color: '#9ca3af', fontWeight: 500, fontSize: 14, margin: 0 }}>Ask anything about your documents</p>
+            <p style={{ color: '#4b5563', fontSize: 13, marginTop: 6, maxWidth: 280, lineHeight: 1.5 }}>
+              Upload documents on the left, then ask questions here.
             </p>
           </div>
         )}
+
         {messages.map((msg, i) => <ChatMessage key={i} message={msg} />)}
+
         {loading && (
-          <div className="flex justify-start fade-up">
-            <div className="flex items-end gap-2">
-              <div className="w-6 h-6 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
-                <span className="text-violet-400 text-xs">AI</span>
-              </div>
-              <div className="bg-white/5 border border-white/8 rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1">
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full bg-violet-400 inline-block" />
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, color: '#a78bfa', flexShrink: 0,
+              }}>AI</div>
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '16px 16px 16px 4px',
+                padding: '12px 16px',
+                display: 'flex', gap: 4,
+              }}>
+                {[0, 1, 2].map(i => (
+                  <span key={i} style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: '#a78bfa', display: 'inline-block',
+                    animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite`,
+                  }} />
+                ))}
               </div>
             </div>
           </div>
         )}
         <div ref={bottomRef} />
       </div>
-      <div className="p-4 border-t border-white/5">
-        <div className="flex gap-3 items-end bg-white/5 border border-white/10 rounded-2xl px-4 py-3 focus-within:border-violet-500/40 transition-colors">
+
+      {/* Input — fixed at bottom, never scrolls */}
+      <div style={{
+        flexShrink: 0,
+        padding: '12px 24px 16px',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        background: '#0e0e16',
+      }}>
+        <div style={{
+          display: 'flex', gap: 12, alignItems: 'flex-end',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 16, padding: '10px 14px',
+          transition: 'border-color 0.2s',
+        }}
+          onFocus={() => {}}
+        >
           <textarea
-  ref={textareaRef}
-  value={input}
-  onChange={(e) => setInput(e.target.value)}
-  onKeyDown={onKeyDown}
-  placeholder="Ask a question about your documents…"
-  rows={1}
-  style={{ resize: 'none', maxHeight: '120px', color: '#e5e7eb' }}
-  className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 focus:outline-none leading-relaxed"
-  onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }}
-/>
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            placeholder="Ask a question about your documents…"
+            rows={1}
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              resize: 'none',
+              maxHeight: 120,
+              fontSize: 13,
+              color: '#e5e7eb',
+              lineHeight: 1.6,
+              fontFamily: 'inherit',
+            }}
+            onInput={(e) => {
+              e.target.style.height = 'auto'
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
+            }}
+          />
           <button
             onClick={send}
             disabled={!input.trim() || loading}
-            className="w-8 h-8 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-all shrink-0"
+            style={{
+              width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+              background: input.trim() && !loading ? '#7c3aed' : 'rgba(124,58,237,0.2)',
+              border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}
           >
-            <Send size={14} />
+            <Send size={13} color={input.trim() && !loading ? '#fff' : '#6d28d9'} />
           </button>
         </div>
-        <p className="text-center text-xs text-gray-700 mt-2">Enter to send · Shift+Enter for new line</p>
+        <p style={{ textAlign: 'center', fontSize: 11, color: '#374151', marginTop: 8 }}>
+          Enter to send · Shift+Enter for new line
+        </p>
       </div>
+
+      <style>{`
+        @keyframes bounce {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-6px); }
+        }
+        div[style*="overflowY"]::-webkit-scrollbar { width: 4px; }
+        div[style*="overflowY"]::-webkit-scrollbar-track { background: transparent; }
+        div[style*="overflowY"]::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+      `}</style>
     </div>
   )
 }
